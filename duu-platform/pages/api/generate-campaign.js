@@ -1,15 +1,60 @@
 import { generateLocalCampaign } from '../../lib/aiFallback';
-import { computeTopPerformers, computeLearnedSignals } from '../../lib/insights';
+import {
+  computeTopPerformers,
+  computeLearnedSignals,
+} from '../../lib/insights';
 
 const DATASET_CONTEXT_PROMPT = () => {
   const top = computeTopPerformers();
   const signals = computeLearnedSignals();
+
   const topLines = top
     .filter((t) => t.post)
     .map((t) => `- ${t.title}: "${t.post.label}" (${t.metric})`)
     .join('\n');
-  return `Here is a small Instagram performance dataset for a college-affiliated music collective ("DUU Tech" / "Small Town Records", STR):\n\nTop performers:\n${topLines}\n\nObserved signals (small dataset, directional not statistical):\n${signals.map((s) => `- ${s}`).join('\n')}`;
+
+  return `Instagram performance data for DUU Tech / Small Town Records:
+
+Top performers:
+${topLines}
+
+Observed signals:
+${signals.map((s) => `- ${s}`).join('\n')}
+
+The dataset is small and directional. Do not claim that event attendance, registrations, or music streams were measured unless those metrics appear directly in the dataset.`;
 };
+
+const STR_AI_CONTEXT = `
+You are a social media strategist for Duke Small Town Records, a student music organization.
+
+Use the selected campaign goal:
+- Discover a Duke artist
+- Stream an artist's music
+- Attend an STR event
+- Build STR awareness
+
+Duke students respond to:
+- Short entertaining Reels
+- Strong first 1–3 second hooks
+- Music clips and artist personality
+- Duke and student-life references
+- Humor and trends
+- Friends, social proof, and community
+- Clear event details and incentives
+- Repeated reminders and day-of Stories
+
+For events, emphasize the experience, artists, atmosphere, logistics, social proof, incentives, and reminders.
+
+For artist discovery, lead with the music, then show personality and Duke identity.
+
+For music streams, use compelling snippets, lyrics, performance clips, repeated exposure, and direct CTAs.
+
+For STR awareness, demonstrate what STR does through entertaining music content.
+
+Create new ideas. Do not simply repeat previous posts.
+Optimize for the selected real-world action, not just views or likes.
+Use realistic expected outcomes.
+`;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -18,47 +63,115 @@ export default async function handler(req, res) {
   }
 
   const { goal } = req.body || {};
-  const goalText = typeof goal === 'string' ? goal.slice(0, 500) : '';
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const goalText =
+    typeof goal === 'string'
+      ? goal.slice(0, 500)
+      : 'Promote an upcoming STR event and maximize attendance';
+
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  console.log('OpenAI key loaded:', Boolean(apiKey));
 
   if (!apiKey) {
     const campaign = generateLocalCampaign(goalText);
-    res.status(200).json({ source: 'local', campaign });
+
+    res.status(200).json({
+      source: 'local',
+      campaign,
+    });
+
     return;
   }
 
   try {
-    const Anthropic = (await import('@anthropic-ai/sdk')).default;
-    const client = new Anthropic({ apiKey });
+    const OpenAI = (await import('openai')).default;
+    const openaiClient = new OpenAI({ apiKey });
 
-    const system = `You are a social media strategist for a college music collective (Small Town Records / DUU Tech). ${DATASET_CONTEXT_PROMPT()}\n\nDesign a NEW six-post campaign grounded in these performance signals. Always respond with ONLY valid JSON, no markdown fences, no preamble, matching this exact shape:\n{"posts": [{"stage": string, "format": string, "idea": string, "hook": string, "cta": string, "goal": string, "metric": string}, ...]} with exactly 6 posts in this order: Teaser, Artist or student spotlight, Main event announcement, Reminder post, Day-of content, Follow-up post.`;
+    const system = `
+${STR_AI_CONTEXT}
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
-      system,
-      messages: [
-        {
-          role: 'user',
-          content: `Campaign goal: ${goalText || 'Promote an upcoming STR event and maximize attendance'}\n\nGenerate the 6-post campaign as JSON.`,
-        },
-      ],
+${DATASET_CONTEXT_PROMPT()}
+
+Generate exactly 6 coordinated posts in this exact order:
+
+1. Teaser
+2. Artist or student spotlight
+3. Main event announcement
+4. Reminder post
+5. Day-of content
+6. Follow-up post
+
+Return only valid JSON with no markdown or explanation.
+
+Use exactly this JSON shape:
+
+{
+  "posts": [
+    {
+      "stage": "string",
+      "format": "string",
+      "idea": "string",
+      "hook": "string",
+      "cta": "string",
+      "goal": "string",
+      "metric": "string"
+    }
+  ]
+}
+
+Include timing, content details, and reasoning inside the existing fields.
+Do not add any additional fields.
+`;
+
+    console.log('Calling OpenAI API for campaign...');
+
+    const response = await openaiClient.responses.create({
+      model: 'gpt-4o-mini',
+      instructions: system,
+      input: `Selected campaign goal: ${goalText}
+
+Generate exactly 6 campaign posts as JSON.`,
     });
 
-    const textBlock = message.content.find((b) => b.type === 'text');
-    const raw = textBlock ? textBlock.text : '{}';
-    const cleaned = raw.replace(/```json|```/g, '').trim();
+    console.log('OpenAI campaign response received');
+
+    const raw = response.output_text || '{}';
+
+    const cleaned = raw
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
     const parsed = JSON.parse(cleaned);
 
-    if (!parsed.posts || !Array.isArray(parsed.posts) || parsed.posts.length === 0) {
-      throw new Error('Malformed AI response');
+    if (
+      !parsed.posts ||
+      !Array.isArray(parsed.posts) ||
+      parsed.posts.length !== 6
+    ) {
+      throw new Error(
+        'Malformed AI response: expected exactly 6 campaign posts'
+      );
     }
 
-    res.status(200).json({ source: 'ai', campaign: { goal: goalText, posts: parsed.posts } });
+    res.status(200).json({
+      source: 'ai',
+      campaign: {
+        goal: goalText,
+        posts: parsed.posts,
+      },
+    });
   } catch (err) {
-    console.error('generate-campaign AI error, falling back to local:', err.message);
+    console.error('OpenAI campaign error:', err);
+
     const campaign = generateLocalCampaign(goalText);
-    res.status(200).json({ source: 'local-fallback', campaign, note: 'AI request failed; showing rule-based campaign instead.' });
+
+    res.status(200).json({
+      source: 'local-fallback',
+      campaign,
+      error: err.message,
+      note: 'AI request failed; showing rule-based campaign instead.',
+    });
   }
 }

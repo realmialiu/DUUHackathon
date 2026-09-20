@@ -1,106 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Caveat:wght@500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+
+  --cream: #fff8e8;
+  --cream-dark: #f4e5c5;
+  --duke-red: #a9272d;
+  --red-dark: #851d24;
+  --brown: #572b17;
+  --green: #1e5d2b;
+  --green-light: #dce8c8;
+  --peach: #efc98d;
+  --ink: #3f2416;
 }
 
-html, body {
-  background-color: #1c1a17;
-  color: #f2e9d8;
-  font-family: 'Space Grotesk', sans-serif;
+html,
+body {
+  background-color: var(--cream);
+  color: var(--brown);
+  font-family: 'DM Sans', sans-serif;
 }
 
+/* Warm paper texture */
 body {
   background-image:
-    radial-gradient(circle at 1px 1px, rgba(242,233,216,0.06) 1px, transparent 0);
-  background-size: 22px 22px;
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(169, 39, 45, 0.04) 0,
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 85% 75%,
+      rgba(30, 93, 43, 0.05) 0,
+      transparent 24%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(87, 43, 23, 0.025) 0,
+      rgba(87, 43, 23, 0.025) 1px,
+      transparent 1px,
+      transparent 5px
+    );
 }
 
 ::selection {
-  background: #c1502e;
-  color: #f2e9d8;
+  background: var(--duke-red);
+  color: var(--cream);
 }
 
+/* Typography */
+
+.display-font {
+  font-family: 'Anton', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+}
+
+.serif-font {
+  font-family: 'Bree Serif', serif;
+}
+
+.scrawl {
+  font-family: 'Permanent Marker', cursive;
+  transform: rotate(-2deg);
+}
+
+body h1,
+body h2,
+body h3 {
+  color: var(--duke-red);
+  font-family: 'Anton', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  line-height: 0.95;
+}
+
+body h1 {
+  font-size: clamp(2.75rem, 7vw, 6rem);
+}
+
+body h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+body h3 {
+  font-size: clamp(1.3rem, 2vw, 2rem);
+}
+
+/* Main poster-style cards */
+
 .sticker-card {
-  background: #241f19;
-  border: 2px solid rgba(242,233,216,0.14);
-  box-shadow: 6px 6px 0 rgba(0,0,0,0.35);
   position: relative;
+  background: var(--cream);
+  color: var(--brown);
+  border: 3px solid var(--duke-red);
+  box-shadow: 8px 8px 0 var(--peach);
 }
 
 .sticker-card::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border: 1px dashed rgba(242,233,216,0.18);
-  margin: 6px;
+  inset: 7px;
+  border: 1px solid rgba(87, 43, 23, 0.25);
   pointer-events: none;
 }
 
+.red-card {
+  background: var(--duke-red);
+  color: var(--cream);
+  border: 3px solid var(--red-dark);
+  box-shadow: 8px 8px 0 var(--brown);
+}
+
+.green-card {
+  background: var(--green);
+  color: var(--cream);
+  border: 3px solid #164820;
+  box-shadow: 8px 8px 0 var(--peach);
+}
+
+.paper-card {
+  background: #fffdf4;
+  color: var(--brown);
+  border: 2px solid rgba(87, 43, 23, 0.35);
+  box-shadow: 5px 5px 0 rgba(87, 43, 23, 0.2);
+}
+
+/* Decorative paper tape */
+
 .tape {
   position: absolute;
-  top: -14px;
+  top: -13px;
   left: 50%;
-  transform: translateX(-50%) rotate(-2deg);
-  width: 64px;
-  height: 22px;
-  background: rgba(242,233,216,0.18);
-  border: 1px solid rgba(242,233,216,0.25);
+  z-index: 2;
+  width: 76px;
+  height: 25px;
+  background: rgba(239, 201, 141, 0.9);
+  border: 1px solid rgba(87, 43, 23, 0.18);
+  transform: translateX(-50%) rotate(-3deg);
+  box-shadow: 1px 2px 0 rgba(87, 43, 23, 0.12);
 }
+
+.tape.red {
+  background: rgba(169, 39, 45, 0.75);
+}
+
+.tape.green {
+  background: rgba(30, 93, 43, 0.7);
+}
+
+/* Decorative pin */
 
 .pin {
   position: absolute;
   top: -10px;
-  right: 14px;
-  width: 14px;
-  height: 14px;
+  right: 15px;
+  width: 17px;
+  height: 17px;
   border-radius: 999px;
-  background: radial-gradient(circle at 35% 30%, #f2e9d8, #c1502e 70%);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  background: var(--duke-red);
+  border: 2px solid var(--red-dark);
+  box-shadow: 2px 3px 0 rgba(87, 43, 23, 0.3);
 }
+
+/* Halftone red graphic */
 
 .halftone-disc {
-  background:
-    repeating-radial-gradient(circle at center, #c1502e 0, #c1502e 1.5px, transparent 1.6px, transparent 5px),
-    #8f3a20;
   border-radius: 999px;
+  background:
+    radial-gradient(circle, var(--cream) 0 1.5px, transparent 1.7px) 0 0 / 7px 7px,
+    var(--duke-red);
+  border: 4px solid var(--red-dark);
 }
 
-.scrawl {
-  font-family: 'Caveat', cursive;
-}
+/* Labels and tags */
 
 .label-tag {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  display: inline-block;
+  color: var(--cream);
+  background: var(--duke-red);
+  padding: 0.35rem 0.7rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
 }
+
+.label-tag.green {
+  background: var(--green);
+}
+
+.label-tag.brown {
+  background: var(--brown);
+}
+
+.metric-number {
+  color: var(--duke-red);
+  font-family: 'Anton', sans-serif;
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.metric-number.green {
+  color: var(--green);
+}
+
+.metric-number.brown {
+  color: var(--brown);
+}
+
+/* Decorative dividers */
 
 .torn-divider {
-  height: 14px;
-  background-image: linear-gradient(135deg, transparent 50%, #1c1a17 50%),
-    linear-gradient(-135deg, transparent 50%, #1c1a17 50%);
-  background-size: 16px 16px;
-  background-position: bottom;
-  background-repeat: repeat-x;
+  height: 18px;
+  background:
+    linear-gradient(135deg, transparent 50%, var(--duke-red) 50%) 0 0 / 18px 18px repeat-x,
+    linear-gradient(45deg, transparent 50%, var(--duke-red) 50%) 9px 0 / 18px 18px repeat-x;
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
+.torn-divider.green {
+  background:
+    linear-gradient(135deg, transparent 50%, var(--green) 50%) 0 0 / 18px 18px repeat-x,
+    linear-gradient(45deg, transparent 50%, var(--green) 50%) 9px 0 / 18px 18px repeat-x;
 }
+
+/* Buttons */
+
+button,
+.button {
+  border: 2px solid var(--brown);
+  background: var(--duke-red);
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 4px 4px 0 var(--brown);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover,
+.button:hover {
+  transform: translate(-2px, -2px) rotate(-1deg);
+  box-shadow: 6px 6px 0 var(--brown);
+}
+
+button:active,
+.button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--brown);
+}
+
+button.secondary,
+.button.secondary {
+  background: var(--green);
+}
+
+/* Small decorative rotations */
+
+.tilt-1 {
+  transform: rotate(-1.2deg);
+}
+
+.tilt-2 {
+  transform: rotate(1deg);
+}
+
+.tilt-3 {
+  transform: rotate(-0.6deg);
+}
+
+.tilt-4 {
+  transform: rotate(1.4deg);
+}
+
+/* Scrollbar */
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 7px;
+  width: 7px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: var(--cream-dark);
+}
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(242,233,216,0.2);
+  background: var(--duke-red);
   border-radius: 999px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .tilt-1 { transform: rotate(-1.2deg); }
-  .tilt-2 { transform: rotate(1deg); }
-  .tilt-3 { transform: rotate(-0.6deg); }
-  .tilt-4 { transform: rotate(1.4deg); }
+/* Accessibility */
+
+:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+/* Force readable text inside light cards, overriding any leftover
+   text-color utility classes (e.g. text-cream, text-creamdim) still
+   present on individual elements from an earlier theme */
+.sticker-card:not(.red-card):not(.green-card) *,
+.paper-card * {
+  color: var(--brown) !important;
+}
+
+.sticker-card:not(.red-card):not(.green-card) h1,
+.sticker-card:not(.red-card):not(.green-card) h2,
+.sticker-card:not(.red-card):not(.green-card) h3,
+.paper-card h1,
+.paper-card h2,
+.paper-card h3 {
+  color: var(--duke-red) !important;
+}
+
+.red-card,
+.red-card *,
+.green-card,
+.green-card * {
+  color: var(--cream) !important;
+}
+
+.label-tag,
+.label-tag * {
+  color: var(--cream) !important;
 }
